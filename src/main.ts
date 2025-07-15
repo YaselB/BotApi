@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { exec } from 'child_process';
 import { DataSource } from 'typeorm';
 import 'reflect-metadata';
+import swaggerOptions from './swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,7 +18,7 @@ async function bootstrap() {
   const datasource = app.get(DataSource);
   datasource.runMigrations();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api', app, document , swaggerOptions);
 
   const port = process.env.PORT ?? 3000;
   

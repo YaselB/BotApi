@@ -98,4 +98,15 @@ export class ConfiguracioMensajeService {
         }
         await this.configurationRepository.save(messages);
     }
+    async DeleteOne(id : string){
+       const entity = await this.configurationRepository.findOne({where :{ id }});
+       if(!entity){
+            throw new NotFoundException(`The configuration with this id: ${id} not found`);
+       }
+       await this.configurationRepository.remove(entity);
+    }
+    async DeleteAll(id : number){
+        var user_configs = await this.findByUser(id);
+        await this.configurationRepository.remove(user_configs);
+    }
 }

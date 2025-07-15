@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, ParseIntPipe, Patch, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Patch, Post, Res, UseGuards } from '@nestjs/common';
 import { ConfiguracioMensajeService } from './configuracio-mensaje.service';
 import { CreateConfigurationMessage } from './Message_configuration.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -44,5 +44,26 @@ export class ConfiguracioMensajeController {
             message: "Configuraciones actualizadas con exito"
         });
     }
-    
+    @UseGuards(JwtAuthGuard)
+    @Delete("DeleteOneConfiguration/:id")
+    async DeleteOne( @Param('id') id: string , @Res() response: Response){
+        try{
+            await this.configurationMessageService.DeleteOne(id);
+            return response.status(200).json({
+                message: "Configuración eliminada correctamente"
+            });
+        }catch(error){
+            return response.status(404).json({
+                message : "La configuracion no ha sido encontrada" 
+            });
+        }
+    }
+    @UseGuards(JwtAuthGuard)
+    @Delete("DeleteAllConfigurations/:id")
+    async DeleteAll( @Param('id' , ParseIntPipe) id: number , @Res() response : Response){
+        await this.configurationMessageService.DeleteAll(id);
+        return response.status(200).json({
+            message: "Configuraciones eliminadas correctamente"
+        });
+    } 
 }
