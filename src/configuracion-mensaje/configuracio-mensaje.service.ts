@@ -53,7 +53,7 @@ export class ConfiguracioMensajeService {
             const diffMs = nowTime - createAtTime;
             const diffMinutes = diffMs / (1000 * 60);
     
-            if (diffMinutes >= element.intervalo) {
+            if (diffMinutes >= element.intervalo && element.enabled) {
                 
                 const messageBack: MessageBack = {
                     ids_destino: element.ids_destino,
@@ -108,5 +108,73 @@ export class ConfiguracioMensajeService {
     async DeleteAll(id : number){
         var user_configs = await this.findByUser(id);
         await this.configurationRepository.remove(user_configs);
+    }
+    async Disable_One(id : string): Promise<ConfiguracionMensaje | null>{
+        var config = await this.configurationRepository.findOne({where : {id}});
+        if(!config){
+            return null;
+        }
+        config.enabled = false;
+        await this.configurationRepository.save(config);
+        return config;
+    }
+    async Disable_All(id : number): Promise<ConfiguracionMensaje[]>{
+        var configs = await this.findByUser(id);
+        for(const i of configs){
+            i.enabled = false;
+        }
+        await this.configurationRepository.save(configs);
+        return configs
+    }
+    async Enable_One(id : string): Promise<ConfiguracionMensaje | null>{
+        var config = await this.configurationRepository.findOne({where : {id}});
+        if(!config){
+            return null;
+        }
+        config.enabled = true;
+        await this.configurationRepository.save(config);
+        return config;
+    }
+    async Enable_All(id : number): Promise<ConfiguracionMensaje[]>{
+        var configs = await this.findByUser(id);
+        for(const i of configs){
+            i.enabled = true;
+        }
+        await this.configurationRepository.save(configs);
+        return configs
+    }
+    async GetEnabled(id : number): Promise<MessageBackToUpdate[]>{
+        var configs = await this.findByUser(id);
+        configs = configs.filter(configs => configs.enabled);
+        var messagesBack : MessageBackToUpdate [] = [];
+        for(const i of configs){
+            const messageBack: MessageBackToUpdate = {
+                ids_destino: i.ids_destino,
+                idUserTelegram: i.user.idUserTelegram,
+                mensaje: i.mensaje,
+                sessionToken: i.user.sesionToken,
+                idConfig: i.id,
+                interval: i.intervalo
+            };
+            messagesBack.push(messageBack);
+        }
+        return messagesBack;
+    }
+    async GetDisabled(id : number): Promise<MessageBackToUpdate[]>{
+        var configs = await this.findByUser(id);
+        configs = configs.filter(configs => !configs.enabled);
+        var messagesBack : MessageBackToUpdate [] = [];
+        for(const i of configs){
+            const messageBack: MessageBackToUpdate = {
+                ids_destino: i.ids_destino,
+                idUserTelegram: i.user.idUserTelegram,
+                mensaje: i.mensaje,
+                sessionToken: i.user.sesionToken,
+                idConfig: i.id,
+                interval: i.intervalo
+            };
+            messagesBack.push(messageBack);
+        }
+        return messagesBack;
     }
 }

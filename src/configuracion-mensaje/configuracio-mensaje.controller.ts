@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Patch, 
 import { ConfiguracioMensajeService } from './configuracio-mensaje.service';
 import { CreateConfigurationMessage } from './Message_configuration.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { Response } from 'express';
+import { response, Response } from 'express';
 import { MessageBack } from './MessageBack';
 import { MessageBackToUpdate } from './MessageBackToUpdate.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -65,5 +65,57 @@ export class ConfiguracioMensajeController {
         return response.status(200).json({
             message: "Configuraciones eliminadas correctamente"
         });
-    } 
+    }
+    @UseGuards(JwtAuthGuard)
+    @Patch("DisableOneConfiguration/:id")
+    async DisableOne(@Param('id') id: string , @Res() response : Response){
+        const config = await this.configurationMessageService.Disable_One(id);
+        if(!config){
+            return response.status(404).json({
+                message: "La configuración no ha sido encontrada"
+            })
+        }
+        return response.status(200).json({
+            message : "Configuracion deshabilitada correctamente"
+        })
+    }
+    @UseGuards(JwtAuthGuard)
+    @Patch("DisableAllConfigurations/:id")
+    async DisableAll(@Param('id' , ParseIntPipe) id: number , @Res() response : Response){
+        await this.configurationMessageService.Disable_All(id);
+        return response.status(200).json({
+            message : "Configuraciones deshabilitadas correctamente"
+        })
+    }
+    @UseGuards(JwtAuthGuard)
+    @Patch("EnableOneConfiguration/:id")
+    async EnableOne(@Param('id') id: string , @Res() response : Response){
+        const config = await this.configurationMessageService.Enable_One(id);
+        if(!config){
+            return response.status(404).json({
+                message: "La configuración no ha sido encontrada"
+            })
+        }
+        return response.status(200).json({
+            message : "Configuración habilitada correctamente"
+        })
+    }
+    @UseGuards(JwtAuthGuard)
+    @Patch("EnableAllConfigurations/:id")
+    async EnableAll(@Param('id' ,ParseIntPipe) id: number , @Res() response : Response){
+        await this.configurationMessageService.Enable_All(id);
+        return response.status(200).json({
+            message : "Configuraciones habilitadas correctamente"
+        })
+    }
+    @UseGuards(JwtAuthGuard)
+    @Get("GetEnableConfigurations/:id")
+    async GetEnable(@Param('id' , ParseIntPipe) id: number ){
+        return await this.configurationMessageService.GetEnabled(id);
+    }
+    @UseGuards(JwtAuthGuard)
+    @Get("GetDisableConfigurations/:id")
+    async GetDisable(@Param('id' , ParseIntPipe) id: number ){
+        return await this.configurationMessageService.GetDisabled(id);
+    }
 }
